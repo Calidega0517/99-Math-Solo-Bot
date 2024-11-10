@@ -1,160 +1,40 @@
-// Function to solve math problems (addition, subtraction, multiplication, division, decimals)
-function solveMathProblem(problem) {
-    // Clean up the problem: remove spaces, commas, and other unwanted characters
-    problem = problem.replace(/\s+/g, '').replace(/,/g, '');
+// Function to click the "Play" button that appears after the "Next" button
+async function clickPlayButtonAfterNext() {
+    const checkInterval = 1000; // Interval to check every second
 
-    // Handle the case where 'x' is used for multiplication instead of '*' (e.g., '12 x 7')
-    problem = problem.replace(/x/g, '*');  // Replace 'x' with '*' for multiplication
-
-    // Validate that the problem contains only valid characters (digits, operators, and decimal points)
-    if (!/^[\d+\-*/().]+$/.test(problem)) {
-        console.error('Invalid math problem format:', problem);
-        return NaN;
-    }
-
-    try {
-        // Use the Function constructor to evaluate the expression safely
-        const result = new Function(`return ${problem}`)();
+    const playClicker = setInterval(() => {
+        // Look for the second "Play" button that appears after clicking "Next"
+        const playButton = document.querySelector('.island-page-play-btn-container .button-large.play-btn');
         
-        // Check if the result is a valid number
-        if (isNaN(result)) {
-            console.error('Invalid calculation result:', result);
-            return NaN;
-        }
-
-        return result;
-    } catch (error) {
-        console.error('Error solving the math problem:', error);
-        return NaN;
-    }
-}
-
-// Function to automate solving the math problem on the page
-async function autoSolve99Math() {
-    const problemElement = document.querySelector('.math99-game-question-view');
-    if (!problemElement) {
-        console.error('Math problem element not found!');
-        return false;
-    }
-
-    const problemText = problemElement.textContent.trim();
-    console.log("Math problem:", problemText);
-    
-    const solution = solveMathProblem(problemText);
-    console.log('Solution:', solution);
-
-    const answerField = document.querySelector('input[type="text"]');
-    if (!answerField) {
-        console.error('Answer input field not found!');
-        return false;
-    }
-
-    answerField.value = solution.toString().trim();
-    const inputEvent = new Event('input', { bubbles: true });
-    answerField.dispatchEvent(inputEvent);
-
-    setTimeout(() => {
-        const submitButton = document.querySelector('.button__submit');
-        if (submitButton) {
-            submitButton.click();
+        if (playButton) {
+            console.log('Clicking the second Play button...');
+            playButton.click();
+            clearInterval(playClicker);  // Stop checking once found and clicked
         } else {
-            console.error('Submit button not found!');
-        }
-    }, 2000);
-
-    return true;
-}
-
-// Function to click the "Start Play" button (button at the start of the level)
-function clickStartPlayButton() {
-    const playButton = document.querySelector('.gs-actions-btn');
-    if (playButton) {
-        console.log('Clicking the Start Play button');
-        playButton.click();
-    } else {
-        console.log('Start Play button not found.');
-    }
-}
-
-// Function to click the "End Play" button (button at the end of the level)
-async function clickEndPlayButton() {
-    const playButton = document.querySelector('.button-large.play-btn');
-    if (playButton) {
-        console.log('Clicking the End Play button');
-        playButton.click();
-    } else {
-        console.log('End Play button not found, retrying...');
-        // Retry after 2 seconds if the button wasn't found initially
-        setTimeout(clickEndPlayButton, 2000);
-    }
-}
-
-// Function to continuously check and click the "Continue" button until it is found
-async function clickContinueButtonUntilFound() {
-    const checkInterval = 1000;
-
-    const continueClicker = setInterval(() => {
-        const continueButton = document.querySelector('.button-large.rewards-view-next-btn') || 
-                               document.querySelector('button:contains("CONTINUE")') ||
-                               Array.from(document.querySelectorAll('.text-wrapper span')).find(span => span.textContent.trim() === 'CONTINUE') ||
-                               document.querySelector('button[data-v-4f19ca64]');
-
-        if (continueButton) {
-            console.log('Clicking Continue...');
-            continueButton.click();
-            clearInterval(continueClicker);
-        } else {
-            console.log('Continue button not found, retrying...');
+            console.log('No second Play button found, retrying...');
         }
     }, checkInterval);
 }
 
-// Function to continuously check and click the "Next" button until it is found
-async function clickNextButtonUntilFound() {
-    const checkInterval = 1000;
+// Function to click the "Play" button (starting the game after level is chosen)
+async function clickPlayButtonAfterLevel() {
+    const checkInterval = 1000; // Interval to check every second
 
-    const nextClicker = setInterval(() => {
-        const nextButton = document.querySelector('.button-large.btn-continue') || 
-                           Array.from(document.querySelectorAll('.text-wrapper span')).find(span => span.textContent.trim() === 'NEXT');
-
-        if (nextButton) {
-            console.log('Clicking Next...');
-            nextButton.click();
-            clearInterval(nextClicker);
+    const playClicker = setInterval(() => {
+        // Look for the "Play" button that appears after the level is chosen
+        const playButton = document.querySelector('.gs-actions-btn');
+        
+        if (playButton) {
+            console.log('Clicking the Play button...');
+            playButton.click();
+            clearInterval(playClicker);  // Stop checking once found and clicked
         } else {
-            console.log('Next button not found, retrying...');
+            console.log('No Play button found, retrying...');
         }
     }, checkInterval);
 }
 
-// Function to keep solving problems until the game ends
-async function keepSolving() {
-    let problemSolved = true;
-
-    while (problemSolved) {
-        const problemElement = document.querySelector('.math99-game-question-view');
-        if (!problemElement) {
-            console.log('Game ended or problem element not found!');
-            break;
-        }
-
-        problemSolved = await autoSolve99Math();
-        if (!problemSolved) {
-            console.log('Problem could not be solved.');
-            break;
-        }
-
-        await clickContinueButtonUntilFound();
-
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait before clicking the next button
-
-        await clickNextButtonUntilFound();
-
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait before the next loop iteration
-    }
-}
-
-// Function to click the highest unlocked level and start the game
+// Function to click the highest unlocked level
 function clickHighestUnlockedLevelAndPlay() {
     const container = document.querySelector("#gs-wrapper > div.gs-body > div.gs-container");
 
@@ -179,8 +59,8 @@ function clickHighestUnlockedLevelAndPlay() {
             console.log(`Clicking on the highest unlocked level: Level ${highestUnlockedLevel}`);
             highestLevelElement.click();
 
-            // Click the Start Play button after selecting the level
-            clickStartPlayButton();
+            // After selecting the highest unlocked level, click the "Play" button to start the game
+            clickPlayButtonAfterLevel();
         } else {
             console.log('No unlocked levels found.');
         }
@@ -189,22 +69,156 @@ function clickHighestUnlockedLevelAndPlay() {
     }
 }
 
-// Function to start the game and keep it running in an infinite loop
-async function startGame() {
-    while (true) {
-        // First, click the highest unlocked level and then click the Start Play button
-        clickHighestUnlockedLevelAndPlay();
+// Function to solve math problems
+function solveMathProblem(problem) {
+    problem = problem.replace(/\s+/g, '');
+    console.log("Solving problem:", problem);
 
-        // Start solving math problems immediately
-        await keepSolving();
+    if (problem.includes('=')) {
+        const [leftSide, rightSide] = problem.split('=');
+        const result = parseFloat(rightSide);
+        console.log(`Equation detected: Left Side = ${leftSide}, Right Side = ${result}`);
 
-        // After finishing the problems, click the End Play button to continue or complete the game
-        await clickEndPlayButton();
+        const variableMatch = leftSide.match(/([a-zA-Z])\s*([+\-*/]?)\s*([0-9]+(\.[0-9]+)?)/);
 
-        // Wait before repeating the cycle, to avoid overwhelming the server
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Adjust time between loops if necessary
+        if (variableMatch) {
+            const variable = variableMatch[1];
+            const operator = variableMatch[2];
+            const number = parseFloat(variableMatch[3]);
+
+            if (operator === '-') {
+                return result + number;
+            } else if (operator === '+') {
+                return result - number;
+            } else {
+                console.error('Unsupported operator:', operator);
+                return NaN;
+            }
+        } else {
+            console.error('Failed to parse equation:', problem);
+            return NaN;
+        }
+    } else {
+        try {
+            if (/^[0-9+\-*/.()]+$/.test(problem)) {
+                const result = new Function(`return ${problem}`)();
+                console.log(`Arithmetic result for '${problem}': ${result}`);
+                return isNaN(result) ? NaN : result;
+            } else {
+                console.error('Invalid characters in math problem:', problem);
+                return NaN;
+            }
+        } catch (error) {
+            console.error('Error evaluating arithmetic expression:', error);
+            return NaN;
+        }
     }
 }
 
-// Start the process with a delay to allow page content to load
-setTimeout(startGame, 3000); // Delay of 3 seconds to wait for page content to load
+// Function to automatically solve math problems
+async function autoSolve99Math() {
+    const problemElement = document.querySelector('.math99-game-question-view');
+    if (!problemElement) {
+        console.error('Math problem element not found!');
+        return false;
+    }
+
+    const problemText = problemElement.textContent.trim();
+    console.log("Detected Math problem:", problemText);
+
+    const solution = solveMathProblem(problemText);
+    console.log('Calculated Solution:', solution);
+
+    if (isNaN(solution) || solution === undefined) {
+        console.error('Invalid solution:', solution);
+        return false;
+    }
+
+    const answerField = document.querySelector('input[type="text"]') || document.querySelector('.c-input.box-input input');
+    if (!answerField) {
+        console.error('Answer input field not found!');
+        return false;
+    }
+
+    answerField.value = solution.toString();
+    answerField.dispatchEvent(new Event('input', { bubbles: true }));
+
+    setTimeout(() => {
+        const submitButton = document.querySelector('.button__submit');
+        if (submitButton) {
+            console.log('Clicking submit button...');
+            submitButton.click();
+        } else {
+            console.error('Submit button not found!');
+        }
+    }, 1000);
+
+    return true;
+}
+
+// Function to click the "Continue" button until found
+async function clickContinueButtonUntilFound() {
+    const interval = setInterval(() => {
+        const continueButton = document.querySelector('.button-large.rewards-view-next-btn') ||
+                               document.querySelector('button:contains("CONTINUE")');
+        if (continueButton) {
+            console.log('Clicking Continue button...');
+            continueButton.click();
+            clearInterval(interval);
+        }
+    }, 1000);
+}
+
+// Function to click the "NEXT" button when found
+async function clickNextButtonUntilFound() {
+    const checkInterval = 1000;
+
+    const nextClicker = setInterval(() => {
+        const nextButton = document.querySelector('.c-home-game-end--content-wrap__btn-container .button-large.btn-continue') ||
+                           Array.from(document.querySelectorAll('.text-wrapper span')).find(span => span.textContent.trim() === 'NEXT');
+
+        if (nextButton) {
+            console.log('Clicking Next button...');
+            nextButton.click();
+            clearInterval(nextClicker);
+        } else {
+            console.log('Next button not found, retrying...');
+        }
+    }, checkInterval);
+}
+
+// Main function to keep solving math problems and progressing through the game
+async function startGame() {
+    // Start the loop by clicking the highest unlocked level and starting the game
+    clickHighestUnlockedLevelAndPlay();
+
+    // Infinite loop to solve math problems and progress through the game
+    while (true) {
+        // Solve the current math problem
+        await autoSolve99Math();
+
+        // Wait for a short duration before proceeding
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Click the "Continue" button if found
+        await clickContinueButtonUntilFound();
+
+        // Wait before clicking the "Next" button
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Click the "Next" button
+        await clickNextButtonUntilFound();
+
+        // After clicking "Next", wait for the "Play" button to appear and click it
+        await clickPlayButtonAfterNext();
+
+        // Wait before repeating the entire loop cycle
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // At the end of each cycle, go back and click the highest unlocked level again
+        clickHighestUnlockedLevelAndPlay();
+    }
+}
+
+// Start solving math problems and clicking buttons, with a 3-second delay to wait for page content
+setTimeout(startGame, 3000);
